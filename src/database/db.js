@@ -1,19 +1,17 @@
-const { MongoClient } = require('mongodb');
-const { connection } = require('mongoose');
-// or as an es module:
-// import { MongoClient } from 'mongodb'
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 
-// Connection URL
-const url = 'mongodb+srv://akinsuyitaiwod:Temidayo1@cluster0.r4et878.mongodb.net/EVENT-HANDLER"';
-const client = new MongoClient(url);
+dotenv.config();
+const URI = process.env.MONGO_URL;
 
-// Database Name
-const dbName = 'event-handler';
-
-async function connect() {
-    await client.connect();
-    const db = await client.db(dbName);
-    return db;
+const connectDB = async () => {
+    try {
+        mongoose.set('strictQuery', false);
+        const connection = mongoose.connect(URI);
+        console.log('connecting database')
+        return connection
+    } catch (error) {
+        throw error
+    }
 }
-
-module.exports = connection;
+module.exports = connectDB;
