@@ -1,7 +1,9 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
-const { hash } = require('bcrypt');
+const { hash, compare } = require('bcrypt');
 const userModel = require('../models/userModel');
+const sendEmail = require('../utils/mail')
+const { sign } = jwt;
 
 
 exports.createUser = async (req,res) => {
@@ -11,9 +13,10 @@ exports.createUser = async (req,res) => {
             res.status(400).send({
                 message: "content cannot be empty"
             });
-            const existingUser = await userModel.findOne()
-                if(existingUser){
-                    return res.staus(201).send({message:'this user already exists'})
+        }
+        const existingUser = await User.findOne({email});
+            if(existingUser){
+                    return res.status(201).send({message:'this user already exists'})
                 }
             const hashedPassword = await hash(password, 10);
             const nameSplit = name.split(' ');
@@ -25,14 +28,36 @@ exports.createUser = async (req,res) => {
             });
             await user.save();
             const message = `Dear ${name}, thank you for siginig up to this event service`
-            await sendEmail({
-                email: user.email,
-                subject: 'registration message',
-                message
-            });
+            const subject = 'registration message'
+            await sendEmail(email,subject,message);
             res.status(200).send(user);
-        }
     } catch (error) {
-        res.status(400).send(error.message)
+        res.status(500).send(error.message)
+    }
+}
+
+exports.signinUser = async( req, res) => {
+    const {email, password} = req.body;
+    try {
+        const user = await User.findOne({email});
+        if(!user){
+            return res.status(201).send({message:'This email is not registered'});
+        }
+        const incorrectPass = await compare(user.password, password)
+        if(incorrectPass) {
+            res.status(401).send('password mismatch');
+        }
+        const { _id} = user;
+        const JWT_KEY = process.env.JWT_SECRET;
+        const token = sign({_id, email}, JWT_KEY);
+        const userDetails = {
+            _id,
+            email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+         }
+         res.status(201).send({userDetails, token})
+    } catch (error) {
+        throw error
     }
 }

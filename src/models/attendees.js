@@ -6,7 +6,7 @@ const attendeeSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  event: { type: Schema.Types.ObjectId, ref: 'attendee' },
+  event: { type: Schema.Types.ObjectId, ref: 'event' },
 }
 );
 
