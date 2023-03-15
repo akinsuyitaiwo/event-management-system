@@ -1,8 +1,8 @@
-const User = require('../models/userModel');
+const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
 const { hash, compare } = require('bcrypt');
-const userModel = require('../models/userModel');
-const sendEmail = require('../utils/mail')
+const userModel = require('../models/userModel.js');
+const sendEmail = require('../utils/mail.js');
 const { sign } = jwt;
 
 
@@ -16,7 +16,7 @@ exports.createUser = async (req,res) => {
         }
         const existingUser = await User.findOne({email});
             if(existingUser){
-                    return res.status(201).send({message:'this user already exists'})
+                    return res.status(201).send({message:'this user already exists'});
                 }
             const hashedPassword = await hash(password, 10);
             const nameSplit = name.split(' ');
@@ -32,7 +32,7 @@ exports.createUser = async (req,res) => {
             await sendEmail(email,subject,message);
             res.status(200).send(user);
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(error.message);
     }
 }
 
@@ -56,7 +56,7 @@ exports.signinUser = async( req, res) => {
             firstName: user.firstName,
             lastName: user.lastName,
          }
-         res.status(201).send({userDetails, token})
+         res.status(201).send({userDetails, token});
     } catch (error) {
         throw error
     }

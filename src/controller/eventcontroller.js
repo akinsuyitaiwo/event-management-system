@@ -1,6 +1,6 @@
-const Event = require('../models/eventsModel');
-const User = require('../models/userModel');
-const Attendee = require('../models/attendees')
+const Event = require('../models/eventsModel.js');
+const User = require('../models/userModel.js');
+const Attendee = require('../models/attendees.js');
 
 exports.createEvent = async(req,res) => {
     try {
@@ -17,9 +17,9 @@ exports.createEvent = async(req,res) => {
             location,
             description
         });
-        res.status(201).send(eventDetails)
+        res.status(201).send(eventDetails);
     } catch (error) {
-        res.status(500).send('The error is from our end and we are trying hard to solve it')
+        res.status(500).send('The error is from our end and we are trying hard to solve it');
     }
 }
 
@@ -42,8 +42,8 @@ exports.viewEventById = async (req, res) =>{
         res.status(200).send({
             message: 'Event details fetched successfully',
             data: eventDetails
-        })
+        });
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(error.message);
     }
 }
