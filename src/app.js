@@ -1,7 +1,7 @@
 const express = require('express');
 const connectDB = require('./database/db');
 const bodyParser =require('body-parser');
-const router = require('./routes/index');
+const router = require('./routes/indexRoutes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,3 +19,5 @@ app.listen(port, async () => {
   console.log('database connected');
   console.log(`app is listening on ${port}`);
 });
+
+module.exports = app;

@@ -1,63 +1,78 @@
-const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 const { hash, compare } = require('bcrypt');
-const userModel = require('../models/userModel.js');
+const models = require('../models/index.js');
 const sendEmail = require('../utils/mail.js');
+const { validateSignUpData, validateLoginData } = require('../utils/validations/userValidation.js');
 const { sign } = jwt;
 
+dotenv.config();
 
 exports.createUser = async (req,res) => {
-    const {name, email, password} = req.body;
     try {
-        if(!req.body) {
-            res.status(400).send({
-                message: "content cannot be empty"
-            });
+        const valid = validateSignUpData(req.body);
+        if (valid.error) {
+            return res.status(400).send(valid.error.message);
         }
-        const existingUser = await User.findOne({email});
-            if(existingUser){
-                    return res.status(201).send({message:'this user already exists'});
-                }
-            const hashedPassword = await hash(password, 10);
-            const nameSplit = name.split(' ');
-            const user = new User({
-                firstName: nameSplit[0],
-                lastName: nameSplit[1],
-                email: email,
-                password: hashedPassword
-            });
-            await user.save();
-            const message = `Dear ${name}, thank you for siginig up to this event service`
-            const subject = 'registration message'
-            await sendEmail(email,subject,message);
-            res.status(200).send(user);
+        const {name, email, password} = req.body;
+        const User = await models.User.findOne({email});
+        if(User){
+            return res.status(400).send({message:'this user already exists'});
+        }
+        const hashedPassword = await hash(password, 10);
+        const nameSplit = name.split(' ');
+        const user = new models.User({
+            firstName: nameSplit[0],
+            lastName: nameSplit[1],
+            email: email,
+            password: hashedPassword
+        });
+        await user.save();
+        const message = ` Hi ${nameSplit[0]}, Thank you for siginig up to TEMS, Welcome on board.`
+        const subject = 'Registration Mail'
+        await sendEmail(email,subject,message);
+        return res.status(201).send({
+            message : 'Account created successfully',
+            data : user
+        });
     } catch (error) {
-        res.status(500).send(error.message);
+     return res.status(500).send(error.message);
     }
 }
 
 exports.signinUser = async( req, res) => {
-    const {email, password} = req.body;
     try {
-        const user = await User.findOne({email});
-        if(!user){
-            return res.status(201).send({message:'This email is not registered'});
+        const valid = validateLoginData(req.body);
+        if (valid.error) {
+            return res.status(400).send(valid.error.message);
         }
-        const incorrectPass = await compare(user.password, password)
-        if(incorrectPass) {
-            res.status(401).send('password mismatch');
+        const { email, password } = req.body;
+        const user = await models.User.findOne({ email });
+        if (!user){
+            return res.status(400).send({
+                message:'This email is not registered'
+            });
+        }
+        const incorrectPass = await compare(password, user.password)
+        if (!incorrectPass) {
+            return res.status(401).send('password mismatch');
         }
         const { _id} = user;
         const JWT_KEY = process.env.JWT_SECRET;
-        const token = sign({_id, email}, JWT_KEY);
+        const token = sign({ _id, email }, JWT_KEY);
         const userDetails = {
             _id,
             email,
             firstName: user.firstName,
             lastName: user.lastName,
-         }
-         res.status(201).send({userDetails, token});
+            role: user.role
+        }
+        return res.status(200).send({
+            message : 'user logged in successfully',
+            data: {userDetails,
+            token}
+    });
     } catch (error) {
-        throw error
+        return res.status(500).send(error.message);
     }
 }

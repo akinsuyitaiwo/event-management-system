@@ -10,4 +10,4 @@ const attendeeSchema = new Schema({
 }
 );
 
-module.exports = mongoose.model("attendee", attendeeSchema);
+module.exports = mongoose.model("Attendee", attendeeSchema);

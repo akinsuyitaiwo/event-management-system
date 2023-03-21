@@ -1,3 +1,4 @@
+const { string } = require('joi');
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -8,6 +9,8 @@ const eventSchema = new Schema({
   date: { type: String, required: true },
   location: { type: String },
   description: { type: String, required: true },
+  status: { type: String, required: true, enum: [ 'pending', 'approved', 'rejected'], default: 'pending' },
+  comment: { type: String },
   attendee: { type: Number },
 }, { timestamps: true}
 );
