@@ -2,7 +2,7 @@ const { Router } = require('express');
 const user = require('./userRoutes.js');
 const event = require('./eventRoutes.js');
 const attendee = require('./attendeeRoutes.js');
-const admin = require('./adminRoutes');
+const admin = require('./adminRoutes.js');
 const router = Router();
 
 router.use('/users', user);
