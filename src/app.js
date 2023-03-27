@@ -16,8 +16,8 @@ app.get('/', (req, res) => {
 
 app.listen(port, async () => {
   await connectDB();
-  console.log('database connected');
-  console.log(`app is listening on ${port}`);
+  // console.log('database connected');
+  // console.log(`app is listening on ${port}`);
 });
 
 module.exports = app;
